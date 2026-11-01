@@ -1,0 +1,25 @@
+{
+  "name": "gerunds",
+  "version": "0.1.0",
+  "description": "The verb beside Claude Code's working spinner, chosen by the model. One tool, mcp__gerunds__status, a long-think note, and /gerunds for the session's list.",
+  "author": {
+    "name": "SyntaxAsSpiral"
+  },
+  "license": "MIT",
+  "keywords": [
+    "spinner",
+    "verb",
+    "gerund"
+  ],
+  "types": "./types/index.d.ts",
+  "userConfig": {
+    "longThinkSeconds": {
+      "type": "number",
+      "title": "Long think (seconds)",
+      "description": "A single stretch of thinking this long lets the model pick one fresh verb for the rest of the turn. 0 turns it off.",
+      "default": 10,
+      "min": 0,
+      "max": 600
+    }
+  }
+}

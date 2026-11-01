@@ -1,6 +1,6 @@
 # gerunds
 
-A mod for Claude Code that lets the model name the stretch of work it is in. The word is a gerund or a short phrase of the model's own choosing ("Weaving tehtar", "Racing the mod"), not a pick from a fixed list. matrix-spinner reads that word and draws it. Without matrix-spinner, Claude Code's own spinner keeps drawing, and this plugin still answers its tool and `/gerunds`.
+A mod for Claude Code that lets the model name the stretch of work it is in. The word is a gerund or a short phrase of the model's own choosing ("Weaving tehtar", "Racing the mod"), not a pick from a fixed list. When it holds a verb, a Spinner render passes that word on and leaves message and suffix alone. Otherwise the render passes through unchanged, and so does a render whose message is already set. Claude Code's own spinner draws the word with no other mod installed.
 
 The plugin name is `gerunds`. The tool is `mcp__gerunds__status`. The slash command is `/gerunds`.
 
@@ -12,15 +12,15 @@ The plugin name is `gerunds`. The tool is `mcp__gerunds__status`. The slash comm
 - `/gerunds` lists every verb set this session, oldest first, each with the time it was set, up to the last 500. The list is in session state only, and it is gone when the session ends.
 - A verb lasts for the turn. The next turn starts again from the engine's own verb. The plugin reads and writes none of Claude Code's verb settings.
 
-The current verb is session state under the key `verb`. matrix-spinner reads that key. This plugin does not rewrite the spinner's props.
+The current verb is session state under the key `verb`, for this plugin and `/gerunds`. It is empty when the engine's own word should show.
 
 ## The one setting
 
 `longThinkSeconds`, in the `/config` menu, is how long one stretch of thinking must last before the model is asked to set a verb. The default is 10 seconds. `0` turns that off.
 
-## With the spinner
+## Order
 
-matrix-spinner is the companion that draws the word. It is not required. Installed together, the spinner shows the verb this plugin set, and a new verb restarts the scramble and the gleam. Installed alone, the engine's spinner is untouched and the transcript rows, the note, and `/gerunds` still work.
+gerunds must run before matrix-spinner; the prependPlugins managed setting seats it; zk is verifying the default order.
 
 ## Privacy
 

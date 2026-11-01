@@ -2,7 +2,7 @@ import type { Register } from 'claude-code'
 
 import type { Verb } from '../types'
 
-// The names a rename would touch. The spinner reads VERB. Nothing else does.
+// The names a rename would touch. verb and verbs are this plugin's own state.
 const STATUS_TOOL = 'mcp__gerunds__status'
 const COMMAND = 'gerunds'
 const VERB = { plugin: 'gerunds', key: 'verb' } as const
@@ -126,6 +126,16 @@ export const register: Register = (on, options) => {
     isThinking = false
     await $.state.set(VERB, '')
     return next(e)
+  })
+
+  // A verb replaces the Spinner word on the way through. No tree: a drawer further in has to run.
+  // message and suffix stay as they arrived. A non-null engine message is passed through whole.
+  on('ui.render', { component: 'Spinner' }, async ($, e, next) => {
+    if (e.props.message !== null) return next(e)
+    const held = await $.state.get(VERB)
+    const verb = typeof held.value === 'string' ? held.value : ''
+    if (verb === '') return next(e)
+    return next({ ...e, props: { ...e.props, word: verb } })
   })
 
   // The status tool's rows in the transcript, shortened to "updated verb: <the verb>". The verb stays in it, so the

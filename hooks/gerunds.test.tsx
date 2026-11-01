@@ -244,3 +244,29 @@ test('the status result is an empty box until it is expanded', async ($, on) => 
   expect(await result('mcp__gerunds__status', true)).toBe('engine')
   expect(await result('Bash', false)).toBe('engine')
 })
+
+test('a held verb is the word the next hook sees, and a message passes through', async ($, on) => {
+  mock.clock(on)
+  on('session.start', (_: any, e: any) => ({ cwd: e.cwd }))
+  on('turn.start', (_: any, e: any) => ({ turnId: e.turnId }))
+  on('tool.register', (_: any, e: any) => ({ value: { tool: e.name === 'status' ? 'mcp__gerunds__status' : e.name } }))
+  on('command.register', () => ({ value: {} }))
+  on('tool.call', () => ({ result: {} }))
+  on('ui.render', ($: any, e: any) => {
+    const { Text } = $.ui.resolve(e)
+    if (e.component !== 'Spinner') return <Text>engine</Text>
+    return <Text>{'w=' + e.props.word + '|m=' + String(e.props.message) + '|s=' + e.props.suffix}</Text>
+  })
+  await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
+  await $.turn.start({ text: 'hi', turnId: 'spin' })
+  const ui = await $.ui.mount({
+    plugin: 'gerunds', surface: 'terminal', component: 'Spinner', requestId: 's1',
+    props: { word: 'Working', message: null, suffix: '…', mode: 'thinking' },
+  })
+  expect((await ui.find({ type: 'Text' }))?.text).toBe('w=Working|m=null|s=…')
+  await $.tool.call({ tool: 'mcp__gerunds__status', text: 'Frolicking' })
+  expect((await ui.find({ type: 'Text' }))?.text).toBe('w=Frolicking|m=null|s=…')
+  await ui.redraw({ word: 'Working', message: 'saving', suffix: '…', mode: 'thinking' })
+  expect((await ui.find({ type: 'Text' }))?.text).toBe('w=Working|m=saving|s=…')
+  await ui.unmount()
+})

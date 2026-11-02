@@ -1,5 +1,13 @@
 {
   "name": "claude-gerunds",
-  "owner": { "name": "SyntaxAsSpiral" },
-  "plugins": [{ "name": "gerunds", "source": "./" }]
+  "owner": {
+    "name": "SyntaxAsSpiral"
+  },
+  "plugins": [
+    {
+      "name": "gerunds",
+      "source": "./"
+    }
+  ],
+  "description": "gerunds: the model names its own work. The word beside Claude Code's working spinner becomes a gerund of the model's choosing, and /gerunds lists the session's verbs."
 }

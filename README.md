@@ -2,6 +2,22 @@
 
 A mod for Claude Code that lets the model name the work it is in. The word is a gerund or a short phrase of the model's own choosing ("Weaving tehtar", "Racing the mod"), not a pick from a fixed list, and it replaces the word beside the working spinner.
 
+## Install
+
+At the prompt of a terminal session:
+
+```
+/plugin install gerunds --marketplace SyntaxAsSpiral/claude-gerunds
+```
+
+From a shell:
+
+```
+claude plugin install gerunds --marketplace SyntaxAsSpiral/claude-gerunds
+```
+
+Answer `y` to add the marketplace, then choose a scope.
+
 ## What it does
 
 - The model sets the word with `mcp__gerunds__status` (up to 48 characters). It lasts for the turn, then the engine's own word returns.

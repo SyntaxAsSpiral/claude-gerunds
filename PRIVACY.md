@@ -2,16 +2,19 @@
 
 gerunds does not send any data about you.
 
-- It reads the model's streamed output in memory, only to time thinking. After a stretch that reaches `longThinkSeconds`, that timing arms one note on the next tool result. The timing stays in memory and is reset when the next turn starts. It does not count tokens and it does not keep the text.
-- Session state holds the current verb. It is empty at the start of a turn, it becomes the text passed to `mcp__gerunds__status` when that text is non-empty, and it is cleared when the turn ends. It is not written to a file.
-- Session state also holds the list of verbs set this session, each with the time it was set, up to the last 500, so `/gerunds` can print them. It is in memory only, is never written to a file, and ends with the session.
-- It makes no network requests.
-- It reads and writes no files, and starts no processes.
-- It uses its own `longThinkSeconds` option, passed into `register`. It calls no `$.config.list()`, writes no setting, and reads no environment variables.
+- It reads the model's streamed output in memory, only to time thinking. It does not count tokens or keep the text. The timing is reset when the next turn starts.
+- Session state holds the current verb, cleared when the turn ends, and the list of verbs set this session with their times, up to the last 500. Both are in memory only and end with the session.
+- It makes no network requests, reads and writes no files, starts no processes, and reads no environment variables.
+- It reads only its own `longThinkSeconds` option and writes no setting.
 - It has no analytics or telemetry.
 
 ## What code runs
 
-The code that runs is `hooks/register.tsx`, named in `hooks/hooks.json`. Its engine calls are `$.clock.now`, `$.tool.register`, `$.command.register`, `$.state.get`, `$.state.set`, `$.ui.invalidate`, and `$.ui.resolve`. `$.command.register` adds one slash command, `/gerunds`, answered by a `command.run` hook that only reads the verb list. `$.tool.register` adds one tool, `status`, exposed as `mcp__gerunds__status`. The verb and the list are held with `$.state`. It hooks `tool.call` for every tool, only to answer its own tool and, once after a long think, to add the note to one other tool's result. For any other tool it reads the tool's name and, to keep them intact, the result's `deny` and `context` fields. It reads nothing from the tool's input or output, and the call passes through unchanged. It also hooks `ui.render` on Spinner: when it holds a verb and the engine message is null, it passes the event on with that word and leaves message and suffix alone; otherwise it passes the event on unchanged, and it returns no tree from that hook. After it records a verb it calls `$.ui.invalidate('ui.render')`. It hooks `ui.render` on CommandOutput, only for its own `/gerunds` row, to drop the engine's `gerunds:` label before the list; any other command's row passes through untouched. It hooks `ui.render` on tool rows and results, only to draw its own tool's row in short form. For any other tool it passes the row through untouched, and it reads only that call's `text`. It declares no MCP servers, runs no shell commands, and runs no other code.
+`hooks/register.tsx`, named in `hooks/hooks.json`. Its engine calls are `$.clock.now`, `$.tool.register`, `$.command.register`, `$.state.get`, `$.state.set`, `$.ui.invalidate` and `$.ui.resolve`.
 
-A non-empty text passed to the tool sets the verb. The tool's description names `mcp__gerunds__status` and says the model may call it whenever a fresh word fits. After a long stretch of thinking, the next tool result gets one note asking the model to call it. The note is in `hooks/register.tsx` and is described in the README.
+- **Tool:** it adds one tool, `mcp__gerunds__status`, and answers only that tool.
+- **Command:** it adds `/gerunds`, which reads only the verb list.
+- **`tool.call` hook:** for other tools it reads the tool's name and the result's `deny` and `context` fields, and passes the call through. Once after a long think it adds a note to one result asking the model to set a verb.
+- **Render hooks:** on the Spinner it swaps in the current verb, if there is one. On `/gerunds` output it drops the `gerunds:` label. It draws its own tool's row in short form. Everything else passes through untouched.
+
+It declares no MCP servers and runs no shell commands or other code.

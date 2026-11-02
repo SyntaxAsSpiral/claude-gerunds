@@ -1,6 +1,6 @@
 {
   "name": "gerunds",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "The verb beside Claude Code's working spinner, chosen by the model. One tool, mcp__gerunds__status, a long-think note, and /gerunds for the session's list.",
   "author": {
     "name": "SyntaxAsSpiral"
@@ -11,7 +11,6 @@
     "verb",
     "gerund"
   ],
-  "types": "./types/index.d.ts",
   "userConfig": {
     "longThinkSeconds": {
       "type": "number",

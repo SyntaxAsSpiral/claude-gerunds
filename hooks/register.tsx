@@ -71,7 +71,8 @@ export const register: Register = (on, options) => {
     const verbs = verbsOf(held.value)
     if (verbs.length === 0) return { text: 'No verbs set yet this session.' }
     const clock = (ms: number) => new Date(ms).toTimeString().slice(0, 8)
-    return { text: verbs.map(v => `${clock(v.at)}  ${v.text}`).join('\n') }
+    // the engine puts the mod's name before the text; the list starts on the line below it
+    return { text: '\n' + verbs.map(v => `${clock(v.at)}  ${v.text}`).join('\n') }
   })
 
   on('tool.call', async ($, e, next) => {

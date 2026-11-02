@@ -110,9 +110,7 @@ test('/gerunds lists the verbs in order, and says so when there are none', async
   await $.tool.call({ tool: 'mcp__gerunds__status', text: 'Inscribing numerals' })
   await $.tool.call({ tool: 'mcp__gerunds__status', text: '' })
   await $.tool.call({ tool: 'mcp__gerunds__status', text: 'Naming the nameless' })
-  const text = String(((await $.command.run({ command: 'gerunds' })) as any).text)
-  expect(text.startsWith('\n')).toBe(true) // the first verb on a line of its own, under the engine's 'gerunds:'
-  const lines = text.slice(1).split('\n')
+  const lines = String(((await $.command.run({ command: 'gerunds' })) as any).text).split('\n')
   expect(lines.length).toBe(2)
   expect(lines[0]).toMatch(/^\d\d:\d\d:\d\d  Inscribing numerals$/)
   expect(lines[1]).toMatch(/^\d\d:\d\d:\d\d  Naming the nameless$/)
@@ -124,7 +122,7 @@ test('the log keeps the last 500 verbs', async ($, on) => {
   await $.session.start({ cwd: '/', surface: 'terminal', isInteractive: true })
   await $.turn.start({ text: 'hi', turnId: 'v1' })
   for (let i = 0; i < 501; i++) await $.tool.call({ tool: 'mcp__gerunds__status', text: 'V' + i })
-  const lines = (await listed($)).slice(1).split('\n')
+  const lines = (await listed($)).split('\n')
   expect(lines.length).toBe(500)
   expect(lines[0]).toMatch(/V1$/)
   expect(lines[499]).toMatch(/V500$/)
@@ -271,4 +269,25 @@ test('a held verb is the word the next hook sees, and a message passes through',
   await ui.redraw({ word: 'Working', message: 'saving', suffix: '…', mode: 'thinking' })
   expect((await ui.find({ type: 'Text' }))?.text).toBe('w=Working|m=saving|s=…')
   await ui.unmount()
+})
+
+test("/gerunds draws its list without the engine's 'gerunds:' label; other commands keep theirs", async ($, on) => {
+  const drawn: Record<string, string> = {}
+  on('ui.render', ($: any, e: any) => {
+    drawn[e.requestId] = e.props.text
+    const { Text } = $.ui.resolve(e)
+    return <Text>engine</Text>
+  })
+  const rows: [string, string, string][] = [
+    ['g', 'gerunds', 'gerunds: 19:42:12  Herding grok\n19:42:54  Juggling glyphs'],
+    ['bare', 'gerunds', '19:42:12  Herding grok'],
+    ['other', 'cost', 'gerunds: not ours'],
+  ]
+  for (const [id, command, text] of rows) {
+    const ui = await $.ui.mount({ plugin: 'gerunds', surface: 'terminal', component: 'CommandOutput', requestId: id, props: { command, args: '', text, isErrored: false } })
+    await ui.unmount()
+  }
+  expect(drawn.g).toBe('19:42:12  Herding grok\n19:42:54  Juggling glyphs')
+  expect(drawn.bare).toBe('19:42:12  Herding grok')
+  expect(drawn.other).toBe('gerunds: not ours')
 })

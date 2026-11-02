@@ -71,8 +71,13 @@ export const register: Register = (on, options) => {
     const verbs = verbsOf(held.value)
     if (verbs.length === 0) return { text: 'No verbs set yet this session.' }
     const clock = (ms: number) => new Date(ms).toTimeString().slice(0, 8)
-    // the engine puts the mod's name before the text; the list starts on the line below it
-    return { text: '\n' + verbs.map(v => `${clock(v.at)}  ${v.text}`).join('\n') }
+    return { text: verbs.map(v => `${clock(v.at)}  ${v.text}`).join('\n') }
+  })
+
+  // the engine draws the answer under the mod's name ('gerunds: ...'); the /gerunds echo above is header enough
+  on('ui.render', { component: 'CommandOutput' }, ($, e, next) => {
+    if (e.props.command !== COMMAND || e.props.isErrored) return next(e)
+    return next({ ...e, props: { ...e.props, text: e.props.text.replace(/^gerunds:[ \t]*\n?/, '') } })
   })
 
   on('tool.call', async ($, e, next) => {

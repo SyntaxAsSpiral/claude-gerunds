@@ -25,7 +25,13 @@ Answer `y` to add the marketplace, then choose a scope.
 - Each call leaves a row in the transcript, `updated verb: <the verb>`. ctrl+o shows the whole call.
 - `/gerunds` lists the verbs set this session, oldest first, with their times (the last 500; gone when the session ends).
 
-If another mod draws the spinner itself, gerunds has to run ahead of it (the `prependPlugins` setting) for the word to reach it.
+If another mod draws the spinner itself (a spinner mod such as [matrix-spinner](https://github.com/SyntaxAsSpiral/claude-matrix-spinner)), gerunds has to run ahead of it, or that mod draws Claude Code's own word instead. Add this line to `~/.claude/settings.json`, then run `/reload-plugins`:
+
+```json
+"prependPlugins": ["gerunds@claude-gerunds"],
+```
+
+An organization's managed settings, where they exist, decide this instead.
 
 ## Privacy
 
